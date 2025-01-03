@@ -5,7 +5,7 @@ function Alert({ message, type = "success", isVisible, onClose }) {
   // Colores según el tipo de alerta
   const alertStyles = {
     success: "bg-verdeOs text-crema",
-    error: "bg-red-600 text-white",
+    error: "bg-red-800 text-white",
     info: "bg-verdeCl text-negro",
   };
 

@@ -18,19 +18,22 @@ export function CrearUsuarios() {
     specialty: "",
   });
 
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   useEffect(() => {
-    const especialidades = async () => {
+    const fetchSpecialties = async () => {
       try {
         const { data } = await axios.get(
           "http://localhost:5000/api/specialties"
         );
-        setSpecialties(data)
+        setSpecialties(data);
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching specialties:", error);
       }
     };
-    especialidades();
-  }, [setSpecialties, specialties]);
+    fetchSpecialties();
+  }, []);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -42,22 +45,44 @@ export function CrearUsuarios() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { name, email } = formData;
+    setError("");
+    setSuccess("");
+
+    const { name, email, password } = formData;
 
     // Validación básica
-    if (!name || !email) {
-      return console.log("Datos incompletos requeridos");
+    if (!name || !email || !password) {
+      setError("Nombre, email y contraseña son obligatorios.");
+      return;
     }
 
     try {
-      const objetoBody = {
-        data: formData,
+      const token = localStorage.getItem("token"); // Asegúrate de tener el token almacenado
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
       };
 
-      // Simulación de envío de datos
-      console.log("Enviando datos:", objetoBody);
+      await axios.post("http://localhost:5000/api/users/create", formData, config);
+      setSuccess("Usuario creado exitosamente.");
+      setFormData({
+        name: "",
+        lastname: "",
+        email: "",
+        password: "",
+        cuilprefix: "",
+        dni: "",
+        cuilpostfix: "",
+        roles: "",
+        doctor: false,
+        nationalLicense: "",
+        provincialLicense: "",
+        specialty: "",
+      });
     } catch (error) {
-      console.error("Error al enviar datos:", error);
+      console.error("Error al crear usuario:", error);
+      setError(
+        error.response?.data?.message || "Ocurrió un error al crear el usuario."
+      );
     }
   };
 
@@ -260,6 +285,15 @@ export function CrearUsuarios() {
             Crear Usuario
           </button>
         </div>
+        {/* Mensajes de éxito o error */}
+        {error && (
+          <div className="col-span-3 text-red-500 text-sm mt-2">{error}</div>
+        )}
+        {success && (
+          <div className="col-span-3 text-green-500 text-sm mt-2">
+            {success}
+          </div>
+        )}
       </form>
     </div>
   );
